@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Location Test</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #111827, #1f2937);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    p {
+      color: #d1d5db;
+      line-height: 1.5;
+    }
+
+    .loader {
+      margin: 25px auto;
+      width: 45px;
+      height: 45px;
+      border: 5px solid rgba(255,255,255,0.2);
+      border-top: 5px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .result {
+      margin-top: 20px;
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 12px 18px;
+      background: #22c55e;
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 12px;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .error {
+      color: #fca5a5;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>Location Test</h1>
+    <p>This page will request your current location for learning purposes.</p>
+
+    <div id="content">
+      <div class="loader"></div>
+      <p>Requesting location...</p>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function () {
+      getLocation();
+    };
+
+    function getLocation() {
+      const content = document.getElementById("content");
+
+      if (!navigator.geolocation) {
+        content.innerHTML = `
+          <div class="error">
+            Your browser does not support location access.
+          </div>
+        `;
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          const accuracy = Math.round(position.coords.accuracy);
+
+          content.innerHTML = `
+            <div class="result">
+              <strong>Latitude:</strong> ${latitude}<br>
+              <strong>Longitude:</strong> ${longitude}<br>
+              <strong>Accuracy:</strong> ${accuracy} meters<br>
+
+              <a href="https://www.google.com/maps?q=${latitude},${longitude}" target="_blank">
+                Open in Google Maps
+              </a>
+            </div>
+          `;
+        },
+
+        function (error) {
+          let message = "";
+
+          if (error.code === error.PERMISSION_DENIED) {
+            message = "Location permission was denied. Please allow location access from your browser settings.";
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            message = "Location information is unavailable.";
+          } else if (error.code === error.TIMEOUT) {
+            message = "Location request timed out. Try again.";
+          } else {
+            message = "An unknown error occurred.";
+          }
+
+          content.innerHTML = `
+            <div class="error">
+              ${message}
+            </div>
+            <button onclick="getLocation()">Try Again</button>
+          `;
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+  </script>
+</body>
+</html>
